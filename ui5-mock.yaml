@@ -1,0 +1,46 @@
+specVersion: "2.6"
+metadata:
+  name: com.sap.build.standard.azoteaApp
+type: application
+server:
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: false
+        backend:
+          - path: /sap
+            url: https://sapes5.sapdevcenter.com
+            client: "002"
+            destination: ES5
+          - path: /here/goes/your/serviceUrl/local/
+            url: https://sapes5.sapdevcenter.com
+            client: "002"
+            destination: ES5
+        ui5:
+          path:
+            - /resources
+            - /test-resources
+          url: https://ui5.sap.com
+          version: 1.108.3
+    - name: fiori-tools-appreload
+      afterMiddleware: compression
+      configuration:
+        port: 35729
+        path: webapp
+        delay: 300
+    - name: fiori-tools-preview
+      afterMiddleware: fiori-tools-appreload
+      configuration:
+        component: com.sap.build.standard.azoteaApp
+        ui5Theme: sap_fiori_3
+    - name: sap-fe-mockserver
+      beforeMiddleware: csp
+      configuration:
+        mountPath: /
+        services:
+          - urlPath: /here/goes/your/serviceUrl/local
+            metadataPath: ./webapp/localService/metadata.xml
+            mockdataPath: ./webapp/localService/data
+            generateMockData: true
+        annotations: []
